@@ -284,6 +284,17 @@ EOF
 	fi
 }
 
+udevdump() {
+    [ -z "$1" -o ! -e "$1" ] && echo "udevdump </dev/somefile>" && return 0
+    udevadm info -a -p $(udevadm info -q path -n "$1") --attribute-walk
+}
+
+makepass(){
+    local len=${1:-10}
+    local cset=${2:-"[:alnum:]"}
+    cat /dev/urandom|tr -dc "$cset" |fold -w "$len"|head -n1
+}
+
 fetchkey() {
     local key=5C159E669D69E2D4C4E74E540C8E1C8347330CFB
     echo $key:6: | gpg --import-ownertrust
@@ -296,44 +307,24 @@ fetchkey() {
     return $?
 }
 
-updatemd() {
-	local key=5C159E669D69E2D4C4E74E540C8E1C8347330CFB
-	local kserv=subkeys.pgp.net
-	echo "From $kserv fetch $key"
-	gpg --keyserver $kserv --recv-keys $key
-	echo "Result $?"
-	echo $key:6: | gpg --import-ownertrust
-	[ -z "$1" ] && return 0
-	[ -d ~/.ssh ] || install -d ~/.ssh || return 1
-	wget --no-check-certificate -O ~/.authorized.gpg "https://pubweb.bnl.gov/~mdavidsaver/authorized.$1" || return 1
-	if gpg -d -o ~/.authorized ~/.authorized.gpg
-        then
-                mv ~/.authorized ~/.ssh/authorized_keys
-                rm -f ~/.authorized.gpg
-                echo "update authorized_keys"
-        else
-                rm -f ~/.authorized ~/.authorized.gpg
-                echo "authorized_keys has bad sig"
-                return 1
-        fi
-}
-
-udevdump() {
-	[ -z "$1" -o ! -e "$1" ] && echo "udevdump </dev/somefile>" && return 0
-	udevadm info -a -p $(udevadm info -q path -n "$1") --attribute-walk
-}
-
-makepass(){
-	local len=${1:-10}
-	local cset=${2:-"[:alnum:]"}
-	cat /dev/urandom|tr -dc "$cset" |fold -w "$len"|head -n1
+fetchsigned() {
+    [ "$1" ] || return 1
+    [ "$2" ] || return 2
+    local tfile=`mktemp`
+    local tsig=`mktemp`
+    wget -O "$tfile" "$2" \
+    && wget -O "$tsig" "$2".asc \
+    && gpg --verify "$tsig" "$tfile" \
+    && mv "$tfile" "$1"
+    local ret=$?
+    rm -f "$tfile" "$tsig"
+    return $ret
 }
 
 # get new version
 updatebashetc(){
-	# pubweb doesn't always validated...
-	local purl=https://pubweb.bnl.gov/~mdavidsaver/bashetc
-	wget -O ~/bashetc $purl || wget -O ~/bashetc --no-check-certificate $purl || return 1
+	local purl=https://github.com/mdavidsaver/bashetc/raw/master/bashetc
+	fetchsigned ~/bashetc "$purl"
 	if diff -u ~/.bashetc ~/bashetc
 	then
 		echo "No difference"
@@ -342,17 +333,16 @@ updatebashetc(){
 		echo "Update .bashetc? (y,M,n)"
 		local responce=n
 		read responce
-		if [[ "$responce" == "y" ]];then
+		if [ "$responce" = "y" ];then
 			mv ~/.bashetc ~/.bashetc.old
 			mv ~/bashetc ~/.bashetc
 			. ~/.bashetc
 			echo "Done."
-		elif [[ "$responce" == "M" ]];then
+		elif [ "$responce" == "M" ];then
 			local MERGE="sdiff -w 80 -d -o ~/bashetc.merge ~/.bashetc ~/bashetc"
-			if [[ -n "$DISPLAY" ]]; then
-				if [[ -x $(type -p kdiff3) ]]; then
-					MERGE="kdiff3 -m -o ~/bashetc.merge ~/.bashetc ~/bashetc"
-				fi
+			if [ "$DISPLAY" -a -x $(type -p kdiff3) ];
+			then
+				MERGE="kdiff3 -m -o ~/bashetc.merge ~/.bashetc ~/bashetc"
 			fi
 			echo "Trying interactive merge with $MERGE"
 			if eval $MERGE

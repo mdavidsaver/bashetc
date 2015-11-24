@@ -5,4 +5,4 @@ clean:
 	rm -f *.asc
 
 %.asc: %
-	gpg -o $@ --detach-sign --armor $<
+	gpg --yes -o $@ --detach-sign --armor $<
