@@ -284,6 +284,18 @@ EOF
 	fi
 }
 
+fetchkey() {
+    local key=5C159E669D69E2D4C4E74E540C8E1C8347330CFB
+    echo $key:6: | gpg --import-ownertrust
+    for KS in hkp://search.keyserver.net hkp://subkeys.pgp.net \
+        hkp://wwwkeys.pgp.net hkp://pgp.mit.edu hkp://pgp.dtype.org
+    do
+      echo "Try keyserver $KS"
+      gpg --keyserver $KS --keyserver-options 'timeout=5' --recv-keys $key && break
+    done
+    return $?
+}
+
 updatemd() {
 	local key=5C159E669D69E2D4C4E74E540C8E1C8347330CFB
 	local kserv=subkeys.pgp.net
