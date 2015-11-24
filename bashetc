@@ -117,21 +117,8 @@ setprompt(){
 	return 0
 }
 
-nullout(){
-	"$@" &> /dev/null
-}
-
 inbg() {
 	"$@" &> /dev/null &
-}
-
-logto(){
-	if [[ -z "$1" ]];then
-		echo "logto file command [args]";return 1
-	fi
-	local lgt="$1"
-	shift
-	"$@" 2>&1 | tee $lgt
 }
 
 setalias(){
@@ -148,12 +135,7 @@ setalias(){
 	alias ll='ls -l'
 	alias pss='ps -A | grep'
 	alias srsync='rsync --rsh=ssh'
-	alias dsleep='sleep 1;xset +dpms;xset dpms force off'
 	alias isinteractive='[[ $- == *i* ]]'
-	alias setup-ups='setup -z$PWD/ups:$PRODUCTS'
-	alias bssh='jumpssh bnl'
-	alias addlib='appendpath LD_LIBRARY_PATH'
-	alias prelib='prependpath LD_LIBRARY_PATH'
 	alias gdb='gdb --silent'
 	unalias nano &>/dev/null
 	unalias pico &>/dev/null
@@ -187,66 +169,6 @@ addpath(){
 	else
 		eval export ${2:-PATH}="\$${2:-PATH}:$1"
 	fi
-}
-
-appendpath(){
-	[ -z "$1" ] && return 1
-	eval export $1="\$$1:$2"
-}
-
-prependpath(){
-	[ -z "$1" ] && return 1
-	eval export $1="$2:\$$1"
-}
-
-# allow for multi hop ssh
-# ie ssh A ssh B to get a term on B.
-jumpssh(){
-
-	if [ -z "$1" ]; then
-		echo "Specify a route." >&2
-		return 1
-	fi
-	local R=$1
-	shift
-
-	if [ -z "$1" ]; then
-		echo "Specify a destination." >&2
-		return 1
-	fi
-
-	local T=
-	local U=
-	local D=
-	if expr "$1" : '[^@]*@.*' > /dev/null;then
-		U=$(expr "$1" : '\([^@]*\)@.*')
-		D=$(expr "$1" : '[^@]*@\(.*\)')
-	else
-		D="$1"
-	fi
-	shift
-
-	[ -z "$*" ]	&& T=-t
-	[ -n "$U" ] && U="${U}@"
-
-	case "$R,$D" in
-	out*,nova)
-		ssh $T $R ssh ${U}${D} \'"$@"\'
-		;;
-	out*,*)
-		ssh $T $R ssh_new ${U}${D} \'"$@"\'
-		;;
-	*)
-		ssh $T $R ssh ${U}${D} \'"$@"\'
-		;;
-	esac
-
-}
-
-# copy ssh config and public keys to a new machine
-pushssh() {
-	tar -C "$HOME" -cz .ssh/config .ssh/*.pub .ssh/authorized_keys .bashetc \
-	| ssh "$@" 'cd "$HOME" && tar -xzv && chmod -R go-rwx .ssh'
 }
 
 # so I don't forget this useful command
@@ -307,7 +229,7 @@ findagent() {
 
 git-setup() {
 	git config --global user.name 'Michael Davidsaver'
-	git config --global user.email 'mdavidsaver@bnl.gov'
+	git config --global user.email 'mdavidsaver@gmail.com'
 	git config --global alias.ci commit
 	git config --global alias.co checkout
 	git config --global alias.st status
@@ -387,24 +309,6 @@ updatemd() {
 udevdump() {
 	[ -z "$1" -o ! -e "$1" ] && echo "udevdump </dev/somefile>" && return 0
 	udevadm info -a -p $(udevadm info -q path -n "$1") --attribute-walk
-}
-
-# wrapper for git-cvsimport with the usual arguments
-# git-cvsimport-dft repo [ branch [ root [ dir ]]]
-git-cvsimport-dft() {
-	local repo=$1
-	local branch=$2
-	local root=$3
-	local dir=$4
-
-	[ -z "$repo" ] && return 42
-	[ -z "$branch" ] && branch="cvs"
-	[ -n "$root" ] && root="-d $root"
-	[ -n "$dir"  ] && dir="-C $dir"
-
-	echo "Run: git cvsimport -i -v -k -p x $root $dir -o $branch $repo"
-	git cvsimport -i -v -k -p x $root $dir -o $branch $repo
-	return $?
 }
 
 makepass(){
