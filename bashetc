@@ -133,9 +133,7 @@ setalias(){
 	esac
 	alias df='df -h'
 	alias ll='ls -l'
-	alias pss='ps -A | grep'
 	alias srsync='rsync --rsh=ssh'
-	alias isinteractive='[[ $- == *i* ]]'
 	alias gdb='gdb --silent'
 	unalias nano &>/dev/null
 	unalias pico &>/dev/null
@@ -153,12 +151,15 @@ setalias(){
 		alias pico='pico -w'
 		alias nano='nano -w'
 	fi
+	unalias most &>/dev/null
 	if type most &>/dev/null
 	then
 		echo -n
 	else
 		alias most=less
 	fi
+	unalias gpg &>/dev/null
+	type gpg2 &>/dev/null && alias gpg=gpg2
 	return 0
 }
 

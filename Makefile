@@ -5,7 +5,7 @@ clean:
 	rm -f *.asc
 
 %.asc: %
-	gpg --yes -o $@ --detach-sign --armor $<
+	gpg --armor --yes -o $@ --detach-sign $<
 
 push:
 	git push origin master master:gh-pages
