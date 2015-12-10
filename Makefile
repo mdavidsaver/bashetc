@@ -6,3 +6,8 @@ clean:
 
 %.asc: %
 	gpg --yes -o $@ --detach-sign --armor $<
+
+push:
+	git push origin master master:gh-pages
+
+.PHONY: push

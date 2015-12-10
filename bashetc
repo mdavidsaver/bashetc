@@ -323,7 +323,7 @@ fetchsigned() {
 
 # get new version
 updatebashetc(){
-	local purl=https://github.com/mdavidsaver/bashetc/raw/master/bashetc
+	local purl=http://mdavidsaver.github.io/bashetc/bashetc
 	fetchsigned ~/bashetc "$purl"
 	if diff -u ~/.bashetc ~/bashetc
 	then
