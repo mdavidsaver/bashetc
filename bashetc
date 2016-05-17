@@ -290,6 +290,11 @@ udevdump() {
     udevadm info -a -p $(udevadm info -q path -n "$1") --attribute-walk
 }
 
+udevtest() {
+    [ -z "$1" -o ! -e "$1" ] && echo "udevdump </dev/somefile>" && return 0
+    udevadm test --action=add $(udevadm info -q path -n "$1")
+}
+
 makepass(){
     local len=${1:-10}
     local cset=${2:-"[:alnum:]"}
