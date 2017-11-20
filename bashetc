@@ -160,6 +160,7 @@ setalias(){
 	fi
 	unalias gpg &>/dev/null
 	type gpg2 &>/dev/null && alias gpg=gpg2
+	alias gpg-findme='echo -e "UPDATESTARTUPTTY\n/bye" | gpg-connect-agent --no-autostart'
 	return 0
 }
 
@@ -239,13 +240,13 @@ git-setup() {
 	git config --global merge.summary true
 	git config --global color.ui true
 	git config --global diff.renameLimit 0
-	git config --global url.ssh://toolbox4.bnl.gov/~/epics/.pushInsteadOf http://epics.nsls2.bnl.gov/
-	git config --global url.ssh://fido.bnl.gov/~/www/git/.pushInsteadOf https://pubweb.bnl.gov/~mdavidsaver/git/
 	git config --global --replace-all url.git@github.com:.pushInsteadOf https://github.com/
 	git config --global --add url.git@github.com:.pushInsteadOf git://github.com/
-
+	git config --global --add "url.git+ssh://git.launchpad.net/.pushInsteadOf" https://git.launchpad.net/
 	git config --global --remove-section url.ssh://toolbox42/~/epics/
 	git config --global --remove-section url.ssh://sun48/~/www/git/
+	git config --global --remove-section url.ssh://toolbox4.bnl.gov/~/epics/
+	git config --global --remove-section url.ssh://fido.bnl.gov/~/www/git/
 }
 
 git-bzr-cleanup() {
@@ -304,8 +305,9 @@ makepass(){
 fetchkey() {
     local key=5C159E669D69E2D4C4E74E540C8E1C8347330CFB
     echo $key:6: | gpg --import-ownertrust
-    for KS in hkp://search.keyserver.net hkp://subkeys.pgp.net \
-        hkp://wwwkeys.pgp.net hkp://pgp.mit.edu hkp://pgp.dtype.org
+    for KS in hkp://keys.gnupg.net/ \
+        hkp://pool.sks-keyservers.net \
+        hkp://search.keyserver.net
     do
       echo "Try keyserver $KS"
       gpg --keyserver $KS --keyserver-options 'timeout=5' --recv-keys $key && break
