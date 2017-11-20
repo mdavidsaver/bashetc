@@ -240,9 +240,15 @@ git-setup() {
 	git config --global merge.summary true
 	git config --global color.ui true
 	git config --global diff.renameLimit 0
+	git config --global sendemail.smtpencryption tls
+	git config --global sendemail.smtpserver smtp.gmail.com
+	git config --global sendemail.smtpuser mdavidsaver@gmail.com
+	git config --global sendemail.smtpserverport 587
 	git config --global --replace-all url.git@github.com:.pushInsteadOf https://github.com/
-	git config --global --add url.git@github.com:.pushInsteadOf git://github.com/
-	git config --global --add "url.git+ssh://git.launchpad.net/.pushInsteadOf" https://git.launchpad.net/
+	git config --global --add         url.git@github.com:.pushInsteadOf git://github.com/
+	git config --global --replace-all url.git+ssh://git.launchpad.net/.pushInsteadOf https://git.launchpad.net/
+	git config --global --add         url.git+ssh://git.launchpad.net/.pushInsteadOf lp:
+	git config --global --replace-all url.https://git.launchpad.net/.insteadof lp:
 	git config --global --remove-section url.ssh://toolbox42/~/epics/
 	git config --global --remove-section url.ssh://sun48/~/www/git/
 	git config --global --remove-section url.ssh://toolbox4.bnl.gov/~/epics/
