@@ -1,74 +1,12 @@
 #!/bin/sh
 # shell function library by Michael Davidsaver <mdavidsaver@gmail.com>
 
-prompt1(){
-local RETV=$?
-local GREEN="\[\033[0;32m\]"
-local LGGREEN="\[\033[1;32m\]"
-local BLUE="\[\033[0;34m\]"
-local LGBLUE="\[\033[1;34m\]"
-local CYAN="\[\033[0;36m\]"
-local RED="\[\033[0;31m\]"
-local LGRED="\[\033[1;31m\]"
-local BLRED="\[\033[5;31m\]"
-local DEFAULT="\[\033[0m\]"
-case $TERM in
-	xterm*) local TITLEBAR='\[\033]0;\u@\H:\w\007\]' ;;
-	*)	local TITLEBAR='' ;;
-esac
-PS1=${TITLEBAR}
-# time
-PS1="${PS1}${CYAN}\133${LGRED}\@${CYAN}\135"
-# user@host
-PS1="${PS1}${CYAN}\133"
-if [ $UID -eq 0 ];then
-	PS1="${PS1}${LGGREEN}\h"
-else
-	PS1="${PS1}${LGGREEN}\u@\h"
-fi
-PS1="${PS1}${CYAN}:"
-# working dir
-PS1="${PS1}${LGBLUE}\W${CYAN}\135"
-# ret value
-if [ $RETV -eq 0 ];then
-	PS1="${PS1}${DEFAULT} "'\$ '
-else
-	PS1="${PS1} ${BLRED}${RETV}${DEFAULT} "'\$ '
-fi
-}
-
-prompt2(){
-local RETV=$?
-local GREEN="\[\033[0;32m\]"
-local LGGREEN="\[\033[1;32m\]"
-local BLUE="\[\033[0;34m\]"
-local LGBLUE="\[\033[1;34m\]"
-local CYAN="\[\033[0;36m\]"
-local RED="\[\033[0;31m\]"
-local LGRED="\[\033[1;31m\]"
-local BLRED="\[\033[5;31m\]"
-local DEFAULT="\[\033[0;0m\]"
-case $TERM in
-	xterm*) local TITLEBAR='\[\033]0;\u@\H:\w\007\]' ;;
-	*)	local TITLEBAR='' ;;
-esac
-PS1=${TITLEBAR}
-# time
-PS1="${PS1}${CYAN}\133${LGRED}\@${CYAN}\135"
-# working directory
-PS1="${PS1}=\173${LGGREEN}${PWD}${CYAN}\n"
-# host
-#PS1="${PS1}\050${BLUE}\H${CYAN}\051-"
-# host
-PS1="${PS1}${CYAN}\074${RED}\h${CYAN}\076"
-# ret value
-if [ $RETV -eq 0 ];then
-	PS1="${PS1}${DEFAULT} "'\$ '
-else
-	PS1="${PS1} \050${BLRED}${RETV}${CYAN}\051${DEFAULT} "'\$ '
-fi
-}
-
+# <user@host:env>-{$PWD
+# [HH:MM AM] $
+#or
+# <host:env>-{$PWD
+# [HH:MM AM] #
+#
 prompt3(){
 local RETV=$?
 local GREEN="\[\033[0;32m\]"
@@ -80,33 +18,28 @@ local RED="\[\033[0;31m\]"
 local LGRED="\[\033[1;31m\]"
 local BLRED="\[\033[5;31m\]"
 local DEFAULT="\[\033[0;0m\]"
-case $TERM in
-	xterm*) local TITLEBAR='\[\033]0;\u@\H:\w\007\]' ;;
-	*)	local TITLEBAR='' ;;
-esac
-PS1=${TITLEBAR}
-if [ $UID -eq 0 ];then
-PS1="${PS1}${CYAN}\074${LGGREEN}\h${CYAN}\076-{${LGBLUE}${PWD}\n"
-else
-PS1="${PS1}${CYAN}\074${LGGREEN}\u${CYAN}@${LGGREEN}\h${CYAN}\076-{${LGBLUE}${PWD}\n"
-fi
-# time
+# <
+PS1="${CYAN}\074"
+# user@
+[ $UID -ne 0 ] && PS1="${PS1}${LGGREEN}\u${CYAN}@"
+# host
+PS1="${PS1}${LGGREEN}\h"
+# :venv
+[ -n "$VIRTUAL_ENV" ] && PS1="${PS1}${CYAN}:${LGRED}`basename $VIRTUAL_ENV`"
+# >-{PWD\n
+PS1="${PS1}${CYAN}\076-{${LGBLUE}${PWD}\n"
+# [time]
 PS1="${PS1}${CYAN}\133${LGRED}\@${CYAN}\135"
-# ret value
-if [ $RETV -eq 0 ];then
-	PS1="${PS1}${DEFAULT} "'\$ '
-else
-	PS1="${PS1}${CYAN}\050${BLRED}${RETV}${CYAN}\051${DEFAULT} "'\$ '
-fi
+# ($?)
+[ $RETV -ne 0 ] && PS1="${PS1}${CYAN}\050${BLRED}${RETV}${CYAN}\051"
+# $
+PS1="${PS1}${DEFAULT} "'\$ '
 }
 
+# no colors
+# [ user@host ] $
 prompt0(){
-case $TERM in
-	xterm*) local TITLEBAR='\[\033]0;\u@\H:\w\007\]' ;;
-	*)	local TITLEBAR='' ;;
-esac
-PS1=${TITLEBAR}
-PS1="${PS1}\133 \u@\h \135 "'\$ '
+PS1="\133 \u@\h \135 "'\$ '
 }
 
 setprompt(){
@@ -151,16 +84,8 @@ setalias(){
 		alias pico='pico -w'
 		alias nano='nano -w'
 	fi
-	unalias most &>/dev/null
-	if type most &>/dev/null
-	then
-		echo -n
-	else
-		alias most=less
-	fi
-	unalias gpg &>/dev/null
-	type gpg2 &>/dev/null && alias gpg=gpg2
 	alias gpg-findme='echo -e "UPDATESTARTUPTTY\n/bye" | gpg-connect-agent --no-autostart'
+	alias scdkill='gpgconf --kill scdaemon'
 	return 0
 }
 
