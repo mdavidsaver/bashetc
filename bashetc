@@ -236,7 +236,8 @@ makepass(){
 fetchkey() {
     local key=5C159E669D69E2D4C4E74E540C8E1C8347330CFB
     echo $key:6: | gpg --import-ownertrust
-    for KS in hkp://keys.gnupg.net/ \
+    for KS in hkps://keys.openpgp.org \
+        hkp://keys.gnupg.net/ \
         hkp://pool.sks-keyservers.net \
         hkp://search.keyserver.net
     do
