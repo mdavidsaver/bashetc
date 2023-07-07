@@ -175,10 +175,12 @@ git-setup() {
 	git config --global --add         url.git+ssh://git.launchpad.net/.pushInsteadOf lp:
 	git config --global --replace-all url.https://git.launchpad.net/.insteadof lp:
 	git config --global --replace-all url.git@gitlab.com:.pushInsteadOf https://gitlab.com/
-	git config --global --remove-section url.ssh://toolbox42/~/epics/
-	git config --global --remove-section url.ssh://sun48/~/www/git/
-	git config --global --remove-section url.ssh://toolbox4.bnl.gov/~/epics/
-	git config --global --remove-section url.ssh://fido.bnl.gov/~/www/git/
+	git config --global --replace-all url.'git@gitlab-ssh.lbl.gov:'.insteadOf 'https://gitlab.lbl.gov/'
+	git config --global --add         url.'git@gitlab-ssh.lbl.gov:'.insteadOf 'git@gitlab.lbl.gov:'
+	git config --global --remove-section url.ssh://toolbox42/~/epics/ 2> /dev/null
+	git config --global --remove-section url.ssh://sun48/~/www/git/ 2> /dev/null
+	git config --global --remove-section url.ssh://toolbox4.bnl.gov/~/epics/ 2> /dev/null
+	git config --global --remove-section url.ssh://fido.bnl.gov/~/www/git/ 2> /dev/null
 }
 
 git-bzr-cleanup() {
