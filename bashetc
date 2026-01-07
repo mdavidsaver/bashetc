@@ -165,6 +165,9 @@ git-setup() {
 	git config --global merge.summary true
 	git config --global color.ui true
 	git config --global diff.renameLimit 0
+	git config --global diff.wordRegex '[_[:alnum:]]+|[^[:space:]]'
+	git config --global status.short true
+	git config --global status.branch true
 	git config --global sendemail.smtpencryption tls
 	git config --global sendemail.smtpserver smtp.gmail.com
 	git config --global sendemail.smtpuser mdavidsaver@gmail.com
@@ -177,10 +180,6 @@ git-setup() {
 	git config --global --replace-all url.git@gitlab.com:.pushInsteadOf https://gitlab.com/
 	git config --global --replace-all url.'git@gitlab-ssh.lbl.gov:'.insteadOf 'https://gitlab.lbl.gov/'
 	git config --global --add         url.'git@gitlab-ssh.lbl.gov:'.insteadOf 'git@gitlab.lbl.gov:'
-	git config --global --remove-section url.ssh://toolbox42/~/epics/ 2> /dev/null
-	git config --global --remove-section url.ssh://sun48/~/www/git/ 2> /dev/null
-	git config --global --remove-section url.ssh://toolbox4.bnl.gov/~/epics/ 2> /dev/null
-	git config --global --remove-section url.ssh://fido.bnl.gov/~/www/git/ 2> /dev/null
 }
 
 git-bzr-cleanup() {
